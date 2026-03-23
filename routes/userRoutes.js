@@ -46,7 +46,7 @@ router.get("/questions/:subject/:chapter", async (req, res) => {
       title: { $regex: `^${chapter}$`, $options: "i" }
     });
 
-    res.json(questions.questions);
+    res.json(questions);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
