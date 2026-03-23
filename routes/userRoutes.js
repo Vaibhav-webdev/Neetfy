@@ -17,7 +17,7 @@ router.get("/chapters/:dynamic", async (req, res) => {
     else if (subject === "physics") Model = Physics;
     else return res.status(400).json({ message: "Invalid subject" });
 
-    const chapters = await Model.find({}, { questions: 0 });
+    const chapters = await Model.find();
     res.json(chapters);
 
   } catch (err) {
