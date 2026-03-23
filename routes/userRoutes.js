@@ -25,6 +25,32 @@ router.get("/chapters/:dynamic", async (req, res) => {
   }
 });
 
+router.get("/questions/:subject/:chapter", async (req, res) => {
+  try {
+    const subject = req.params.subject.toLowerCase();
+    const chapter = req.params.chapter;
 
+    const models = {
+      chemistry: Chemistry,
+      biology: Biology,
+      physics: Physics
+    };
+
+    const Model = models[subject];
+
+    if (!Model) {
+      return res.status(400).json({ message: "Invalid subject" });
+    }
+
+    const questions = await Model.find({
+      title: { $regex: `^${chapter}$`, $options: "i" }
+    });
+
+    res.json(questions);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 export default router;

@@ -1,13 +1,4 @@
-import mongoose from "mongoose";
-import Chemistry from "./models/Chemistry.js";
-import Biology from "./models/Biology.js"
-import Physics from "./models/Physics.js";
-import dotenv from "dotenv";
-
-dotenv.config();   // VERY IMPORTANT
-await mongoose.connect(process.env.MONGO_URI);
-
-const BIOLOGY = [
+[
   {
     "chapterId": 1,
     "title": "The Living World",
@@ -8710,10 +8701,4 @@ const BIOLOGY = [
       }
     ]
   }
-];
-
-await Biology.insertMany(BIOLOGY);
-
-console.log("Products inserted successfully");
-
-process.exit();
+]
