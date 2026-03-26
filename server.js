@@ -2,14 +2,11 @@ import express from "express";
 import connectDB from "./config/db.js";
 import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.js";
-import { clerkMiddleware } from "@clerk/express"; // ← ADD
 
 dotenv.config(); // VERY IMPORTANT — upar rakho, sabse pehle
+app.use(express.json());
 
 const app = express();
-
-app.use(clerkMiddleware());   // ← ADD — har route pe Clerk active rahega
-app.use(express.json());
 
 // connect database
 connectDB();

@@ -12,11 +12,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    name: {
+    firstName: {
       type: String,
       default: "",
     },
-    imageUrl: {
+    lastName: {
+      type: String,
+      default: "",
+    },
+    image: {
       type: String,
       default: "",
     },

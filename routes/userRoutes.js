@@ -3,47 +3,55 @@ import User from "../models/User.js"
 import Chemistry from "../models/Chemistry.js";
 import Biology from "../models/Biology.js"
 import { clerkClient } from "@clerk/express";
+import { verifyWebhook } from "@clerk/express/webhooks";
 import Physics from "../models/Physics.js";
 
 const router = express.Router();
 
-// ── Auth Middleware ──────────────────────────────────────── ← ADD
-async function requireAuth(req, res, next) {
+router.post('/webhooks', express.raw({ type: 'application/json' }), async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ error: "No token provided" });
+    const evt = await verifyWebhook(req)
 
-    const payload = await clerkClient.verifyToken(token);
-    req.clerkId = payload.sub;
-    next();
-  } catch (err) {
-    return res.status(401).json({ error: "Invalid or expired token" });
-  }
+    // Do something with payload
+    // For this guide, log payload to console
+    const { id } = evt.data
+    const eventType = evt.type
+
+    if (eventType === "user.created") {
+      await User.findOneAndUpdate(
+        { clerkId: evt.data.id },
+        {
+          clerkId: evt.data.id,
+          email: evt.data.email_addresses[0]?.email_address,
+          firstName: evt.data.first_name,
+          lastName: evt.data.last_name,
+          image: evt.data.image_url,
+        },
+        { upsert: true, new: true }
+      );
+    }
+
+    if (eventType === "user.deleted") {
+      await User.findOneAndDelete({ clerkId: data.id });
+    }
+    
+    if (evt.type === "user.updated") {
+  const data = evt.data;
+
+  await User.findOneAndUpdate(
+    { clerkId: data.id },
+    {
+      image: data.image_url, // 👈 updated image
+    }
+  );
 }
 
-// ── Auth Sync Route ──────────────────────────────────────── ← ADD
-// Yeh route signup aur login dono ke baad call hoga
-router.post("/auth/sync", requireAuth, async (req, res) => {
-  try {
-    const clerkUser = await clerkClient.users.getUser(req.clerkId);
-
-    const email    = clerkUser.emailAddresses[0]?.emailAddress ?? "";
-    const name     = `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim();
-    const imageUrl = clerkUser.imageUrl ?? "";
-
-    // agar user hai to update karo, nahi hai to naya banao — duplicate kabhi nahi banega
-    const user = await User.findOneAndUpdate(
-      { clerkId: req.clerkId },
-      { $set: { email, name, imageUrl } },
-      { upsert: true, new: true }
-    );
-
-    return res.json({ success: true, user });
+    res.status(200).json({ success: true });
   } catch (err) {
-    console.error("Sync error:", err);
-    return res.status(500).json({ error: "Server error" });
+    console.error('Error verifying webhook:', err)
+    return res.status(400).send('Error verifying webhook')
   }
-});
+}
 
 router.get("/chapters/:dynamic", async (req, res) => {
   try {
