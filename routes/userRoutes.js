@@ -34,24 +34,24 @@ router.post('/webhooks', express.raw({ type: 'application/json' }), async (req, 
     if (eventType === "user.deleted") {
       await User.findOneAndDelete({ clerkId: data.id });
     }
-    
-    if (evt.type === "user.updated") {
-  const data = evt.data;
 
-  await User.findOneAndUpdate(
-    { clerkId: data.id },
-    {
-      image: data.image_url, // 👈 updated image
+    if (evt.type === "user.updated") {
+      const data = evt.data;
+
+      await User.findOneAndUpdate(
+        { clerkId: data.id },
+        {
+          image: data.image_url, // 👈 updated image
+        }
+      );
     }
-  );
-}
 
     res.status(200).json({ success: true });
   } catch (err) {
     console.error('Error verifying webhook:', err)
     return res.status(400).send('Error verifying webhook')
   }
-}
+})
 
 router.get("/chapters/:dynamic", async (req, res) => {
   try {
@@ -85,25 +85,25 @@ router.get("/chapters/:dynamic", async (req, res) => {
 //     const bytes = await file.arrayBuffer();
 //     const buffer = Buffer.from(bytes);
 
-    // 🔥 upload to ImageKit
-    // const uploadResponse = await imagekit.upload({
-    //   file: buffer,
-    //   fileName: `profile_${Date.now()}.jpg`,
-    //   folder: "/profiles",
-    // });
+// 🔥 upload to ImageKit
+// const uploadResponse = await imagekit.upload({
+//   file: buffer,
+//   fileName: `profile_${Date.now()}.jpg`,
+//   folder: "/profiles",
+// });
 
-    // const imageUrl = uploadResponse.url;
+// const imageUrl = uploadResponse.url;
 
-    // 🗄️ SAVE TO DATABASE (example)
-    // 👉 yahan tum apna DB use karo (MongoDB / Prisma / etc.)
-    /*
-    await db.user.update({
-      where: { id: userId },
-      data: { photo: imageUrl },
-    });
-    */
+// 🗄️ SAVE TO DATABASE (example)
+// 👉 yahan tum apna DB use karo (MongoDB / Prisma / etc.)
+/*
+await db.user.update({
+  where: { id: userId },
+  data: { photo: imageUrl },
+});
+*/
 
-    // 🔥 response send
+// 🔥 response send
 //     res.json({
 //       success: true,
 //       url: imageUrl,
