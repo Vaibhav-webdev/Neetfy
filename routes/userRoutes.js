@@ -64,27 +64,27 @@ router.get("/chapters/:dynamic", async (req, res) => {
   }
 });
 
-router.post("/api/upload-profile", async (req, res) => {
-  try {
-    const formData = await req.formData();
-    const file = formData.get("file");
+// router.post("/api/upload-profile", async (req, res) => {
+//   try {
+//     const formData = await req.formData();
+//     const file = formData.get("file");
 
-    if (!file) {
-      return Response.json({ error: "No file provided" }, { status: 400 });
-    }
+//     if (!file) {
+//       return Response.json({ error: "No file provided" }, { status: 400 });
+//     }
 
-    convert to buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+//     convert to buffer
+//     const bytes = await file.arrayBuffer();
+//     const buffer = Buffer.from(bytes);
 
     // 🔥 upload to ImageKit
-    const uploadResponse = await imagekit.upload({
-      file: buffer,
-      fileName: `profile_${Date.now()}.jpg`,
-      folder: "/profiles",
-    });
+    // const uploadResponse = await imagekit.upload({
+    //   file: buffer,
+    //   fileName: `profile_${Date.now()}.jpg`,
+    //   folder: "/profiles",
+    // });
 
-    const imageUrl = uploadResponse.url;
+    // const imageUrl = uploadResponse.url;
 
     // 🗄️ SAVE TO DATABASE (example)
     // 👉 yahan tum apna DB use karo (MongoDB / Prisma / etc.)
@@ -96,19 +96,19 @@ router.post("/api/upload-profile", async (req, res) => {
     */
 
     // 🔥 response send
-    res.json({
-      success: true,
-      url: imageUrl,
-      fileId: uploadResponse.fileId,
-    });
+//     res.json({
+//       success: true,
+//       url: imageUrl,
+//       fileId: uploadResponse.fileId,
+//     });
 
-  } catch (error) {
-    return Response.json(
-      { error: error.message },
-      { status: 500 }
-    );
-  }
-})
+//   } catch (error) {
+//     return Response.json(
+//       { error: error.message },
+//       { status: 500 }
+//     );
+//   }
+// })
 router.get("/questions/:subject/:chapter", async (req, res) => {
   try {
     const subject = req.params.subject.toLowerCase();
