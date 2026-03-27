@@ -24,6 +24,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    notification : {
+      type: Boolean,
+      default: true
+    },
+    sound: {
+      type: Boolean,
+      default: true
+    }
   },
   { timestamps: true } // ← createdAt, updatedAt auto mil jayega
 );

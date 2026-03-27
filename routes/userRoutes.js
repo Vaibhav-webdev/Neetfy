@@ -40,9 +40,9 @@ router.post('/webhooks', express.raw({ type: 'application/json' }), async (req, 
 
       await User.findOneAndUpdate(
         { clerkId: data.id },
-        {
-          image: data.image_url, // 👈 updated image
-        }
+        { image: data.image_url,
+          firstName: data.first_name,
+          lastName: data.last_name }
       );
     }
 
@@ -52,6 +52,92 @@ router.post('/webhooks', express.raw({ type: 'application/json' }), async (req, 
     return res.status(400).send('Error verifying webhook')
   }
 })
+
+router.get("/mix", async (req, res) => {
+  try {
+    const questions = await Chemistry.aggregate([
+      
+      // 👉 Step 1: Chemistry questions
+      { $unwind: "$questions" },
+      {
+        $project: {
+          _id: 0,
+          question: "$questions"
+        }
+      },
+
+      // 👉 Step 2: Physics add karo
+      {
+        $unionWith: {
+          coll: "physics", // 👈 exact collection name
+          pipeline: [
+            { $unwind: "$questions" },
+            {
+              $project: {
+                _id: 0,
+                question: "$questions"
+              }
+            }
+          ]
+        }
+      },
+
+      // 👉 Step 3: Maths add karo
+      {
+        $unionWith: {
+          coll: "biologies",
+          pipeline: [
+            { $unwind: "$questions" },
+            {
+              $project: {
+                _id: 0,
+                question: "$questions"
+              }
+            }
+          ]
+        }
+      },
+
+      // 👉 Step 4: Random 20
+      { $sample: { size: 20 } }
+    ]);
+
+    // 👉 Clean response (sirf question object)
+    const final = questions.map(q => q.question);
+
+    res.json({
+      success: true,
+      count: final.length,
+      data: final
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error"
+    });
+  }
+  // try {
+  //   const [chem, phy, math] = await Promise.all([
+  //     getRandomQuestionsFromCollection(Chemistry),
+  //     getRandomQuestionsFromCollection(Physics),
+  //     getRandomQuestionsFromCollection(Biology),
+  //   ]);
+
+  //   // sabko combine karo
+  //   const allQuestions = [...chem, ...phy, ...math];
+
+  //   // final random 20
+  //   const finalQuestions = allQuestions
+  //     .sort(() => 0.5 - Math.random())
+  //     .slice(0, 20);
+
+  //   res.json(finalQuestions);
+  // } catch (err) {
+  //   res.status(500).json({ error: err.message });
+  // }
+});
 
 router.get("/chapters/:dynamic", async (req, res) => {
   try {
@@ -72,51 +158,6 @@ router.get("/chapters/:dynamic", async (req, res) => {
   }
 });
 
-// router.post("/api/upload-profile", async (req, res) => {
-//   try {
-//     const formData = await req.formData();
-//     const file = formData.get("file");
-
-//     if (!file) {
-//       return Response.json({ error: "No file provided" }, { status: 400 });
-//     }
-
-//     convert to buffer
-//     const bytes = await file.arrayBuffer();
-//     const buffer = Buffer.from(bytes);
-
-// 🔥 upload to ImageKit
-// const uploadResponse = await imagekit.upload({
-//   file: buffer,
-//   fileName: `profile_${Date.now()}.jpg`,
-//   folder: "/profiles",
-// });
-
-// const imageUrl = uploadResponse.url;
-
-// 🗄️ SAVE TO DATABASE (example)
-// 👉 yahan tum apna DB use karo (MongoDB / Prisma / etc.)
-/*
-await db.user.update({
-  where: { id: userId },
-  data: { photo: imageUrl },
-});
-*/
-
-// 🔥 response send
-//     res.json({
-//       success: true,
-//       url: imageUrl,
-//       fileId: uploadResponse.fileId,
-//     });
-
-//   } catch (error) {
-//     return Response.json(
-//       { error: error.message },
-//       { status: 500 }
-//     );
-//   }
-// })
 router.get("/questions/:subject/:chapter", async (req, res) => {
   try {
     const subject = req.params.subject.toLowerCase();
