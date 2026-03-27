@@ -106,8 +106,6 @@ router.get("/mix", async (req, res) => {
     const final = questions.map(q => q.question);
 
     res.json({
-      success: true,
-      count: final.length,
       data: final
     });
 
@@ -137,6 +135,107 @@ router.get("/mix", async (req, res) => {
   // } catch (err) {
   //   res.status(500).json({ error: err.message });
   // }
+});
+
+router.patch("/update-notification", async (req, res) => {
+  try {
+    const { email, notification } = req.body;
+
+    if (typeof notification !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "Notification must be true or false",
+      });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { email },
+      { notification },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Notification updated",
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+// Update Sound
+router.patch("/update-sound", async (req, res) => {
+  try {
+    const { email, sound } = req.body;
+
+    if (typeof sound !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "Sound must be true or false",
+      });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { email },
+      { sound },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Sound updated",
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+router.get("/user", async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
 });
 
 router.get("/chapters/:dynamic", async (req, res) => {
